@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Walkthrough: PochecheBook en React con Hooks y Diseño Facebook (Nota 5.0)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #1c1e21;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      color: #1877f2;
+      border-bottom: 2px solid #e4e6eb;
+      padding-bottom: 12px;
+      font-size: 26px;
+    }
+    h2 {
+      color: #050505;
+      margin-top: 30px;
+      border-bottom: 1px solid #f0f2f5;
+      padding-bottom: 8px;
+      font-size: 20px;
+    }
+    h3 {
+      color: #1877f2;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: #e7f3ff;
+      color: #1877f2;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    pre {
+      background: #1c1e21;
+      color: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 13.5px;
+    }
+    code {
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      background: #f0f2f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #1877f2;
+      font-weight: 600;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-weight: normal;
+    }
+    ul, ol {
+      padding-left: 24px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    .btn-print {
+      float: right;
+      background: #1877f2;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .btn-print:hover {
+      background: #166fe5;
+    }
+    .callout {
+      background-color: #f0f2f5;
+      border-left: 4px solid #1877f2;
+      padding: 14px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; padding: 0; }
+      .btn-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="btn-print" onclick="window.print()">🖨️ Guardar como PDF / Imprimir</button>
+    <h1>Walkthrough: PochecheBook en React con Hooks y Diseño Facebook</h1>
+    <p>Este informe detalla la solución y arquitectura implementada para dar cumplimiento a los 4 criterios de la rúbrica hasta alcanzar la calificación de <strong>5.0</strong>, con identidad oficial <strong>PochecheBook</strong>, registro permanente y buscador de amigos.</p>
+
+    <hr style="border: none; border-top: 1px solid #e4e6eb; margin: 24px 0;">
+
+    <h2>🔧 Correcciones y Mejoras Recientes Aplicadas</h2>
+    <ul>
+      <li><strong>💾 Registro de Usuarios Permanente</strong>: Nueva pestaña <em>"Crear Cuenta"</em> con foto de perfil, profesión, ciudad y fecha de nacimiento. El usuario se guarda en <code>usersList</code> y en <code>localStorage</code>, apareciendo disponible en la lista de cuentas al cerrar sesión.</li>
+      <li><strong>🔎 Buscador de Amigos 100% Funcional</strong>: Se corrigió la propiedad <code>overflow: hidden</code> de W3.CSS en la barra superior que ocultaba el menú de resultados. Además, se añadió la tarjeta <em>"Conectar con Personas"</em> en la columna derecha para buscar amigos desde ambos lugares.</li>
+    </ul>
+
+    <h2>🎯 Cumplimiento de los 4 Criterios de Evaluación</h2>
+
+    <h3>1. Conceptos de los Hooks y Soporte de Vídeos <span class="badge">Nota 3.5</span></h3>
+    <ul>
+      <li><strong><code>useState</code></strong>: Manejo de publicaciones, usuarios registrados, usuario activo, sesión, entradas de texto, notificaciones y modales.</li>
+      <li><strong><code>useEffect</code></strong>: Persistencia automática en <code>localStorage</code> (posts, usuarios y sesión). Limpieza de temporizadores Toast y cierre con tecla <code>Escape</code>.</li>
+      <li><strong><code>useContext</code> (SocialContext)</strong>: Contexto Global que encapsula toda la lógica de negocio y evita el <em>prop-drilling</em>.</li>
+      <li><strong>Soporte de Vídeos</strong>: Soporte nativo de etiquetas <code>&lt;video controls&gt;</code> HTML5 con reproductor responsivo.</li>
+    </ul>
+
+    <h3>2. Diseño Idéntico a un Post de Facebook <span class="badge">Nota 4.0</span></h3>
+    <ul>
+      <li>Cabecera con avatar circular de 44px, autor en negrita, globo terráqueo (🌐) y menú de 3 puntos.</li>
+      <li>Barra de reacciones superpuestas (👍 Me gusta azul, ❤️ Me encanta rojo, 😆 Me divierte amarillo).</li>
+      <li>Botones de acción con hover gris e iluminación azul Facebook.</li>
+      <li>Burbujas de comentarios redondeadas (<code>border-radius: 18px</code>).</li>
+    </ul>
+
+    <h3>3. Corrección del Error del ID del Post del Video Tutorial <span class="badge">Nota 4.5</span></h3>
+    <p>Utilidad <code>src/utils/idGenerator.js</code> con <code>crypto.randomUUID()</code> inmutable. Todas las búsquedas en el estado se realizan mediante coincidencia estricta por ID único (<code>post.id === postId</code>).</p>
+
+    <h3>4. Responder Comentarios, Likes y Compartir <span class="badge">Nota 5.0</span></h3>
+    <ul>
+      <li>Respuestas anidadas e indentadas con enlace <em>"Responder"</em>.</li>
+      <li>Likes interactivos con contador en publicaciones, comentarios y respuestas.</li>
+      <li>Clonación de posts en el muro del usuario con el botón <em>"Compartir"</em>.</li>
+    </ul>
+
+    <hr style="border: none; border-top: 1px solid #e4e6eb; margin: 24px 0;">
+
+    <h2>💻 Cómo Probarlo</h2>
+    <ol>
+      <li>Abre la terminal en la carpeta del proyecto (o en Visual Studio Code presiona <code>Ctrl + `</code>):
+        <pre><code>npm run dev</code></pre>
+      </li>
+      <li>Abre en tu navegador la dirección indicada (usualmente <code>http://localhost:5173</code>).</li>
+      <li><strong>Prueba registrarte</strong>: Cierra sesión, entra a <em>"Crear Cuenta"</em>, completa los datos y sube una foto. Al ingresar, tu cuenta quedará guardada de forma permanente.</li>
+      <li><strong>Prueba buscar amigos</strong>: Escribe en la barra superior o busca en la tarjeta <em>"Conectar con Personas"</em> para enviar solicitudes.</li>
+    </ol>
+  </div>
+</body>
+</html>

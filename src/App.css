@@ -1,0 +1,76 @@
+/* ========================================================
+   ESTILOS GENERALES Y LAYOUT RESPONSIVO ESPACIOSO
+   ======================================================== */
+
+/* Contenedor principal con Grid espacioso (elimina la apariencia unida/apretada) */
+.main-layout-container {
+  max-width: 1320px;
+  margin: 75px auto 40px auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr) 280px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* Columna izquierda */
+.left-sidebar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Columna central (Feed) */
+.feed-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* Columna derecha */
+.right-sidebar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Tarjetas con sombras suaves, bordes redondeados y aire */
+.w3-card,
+.w3-card-2,
+.w3-card-4 {
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #e4e6eb;
+  overflow: hidden;
+}
+
+/* Separación interna dentro de contenedores */
+.w3-container {
+  padding: 16px 20px !important;
+}
+
+/* Adaptabilidad para pantallas medianas (tablets / laptops) */
+@media (max-width: 1100px) {
+  .main-layout-container {
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 20px;
+    padding: 0 16px;
+  }
+  .right-sidebar-col {
+    display: none;
+  }
+}
+
+/* Adaptabilidad para pantallas pequeñas (móviles) */
+@media (max-width: 768px) {
+  .main-layout-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 12px;
+    margin-top: 65px;
+  }
+  .left-sidebar-col {
+    display: none;
+  }
+}
