@@ -63,6 +63,7 @@ export default function SearchFriendsCard() {
             displayedUsers.map(user => {
               const isFriend = (currentUser.friends || []).includes(user.id);
               const isSent = (currentUser.requestsSent || []).includes(user.id);
+              const isReceived = (currentUser.requestsReceived || []).includes(user.id);
 
               return (
                 <div
@@ -114,6 +115,10 @@ export default function SearchFriendsCard() {
                     {isFriend ? (
                       <span className="w3-tag w3-green w3-round w3-tiny">
                         ✓ Amigos
+                      </span>
+                    ) : isReceived ? (
+                      <span className="w3-tag w3-amber w3-round w3-tiny" style={{ color: '#000' }} title="Te envió solicitud">
+                        Pendiente
                       </span>
                     ) : isSent ? (
                       <span className="w3-tag w3-light-grey w3-round w3-tiny" style={{ color: '#65676b' }}>

@@ -1,6 +1,6 @@
-# 📱 PochecheBook - Red Social en React (Estilo Facebook con Hooks)
+# 📱 PochecheBook - Red Social en React (Estilo Facebook con Hooks & Enrutamiento)
 
-**PochecheBook** es una aplicación web completa, modular y responsiva construida con **React 18** y **Vite**, inspirada en la interfaz oficial de **Facebook**, implementando arquitectura basada en **React Hooks (`useState`, `useEffect`, `useContext`)** y cumpliendo con la rúbrica de evaluación para la calificación máxima (**5.0**).
+**PochecheBook** es una aplicación web completa, modular y responsiva construida con **React 18** y **Vite**, inspirada en la interfaz oficial de **Facebook**, implementando arquitectura basada en **React Hooks (`useState`, `useEffect`, `useContext`)**, enrutamiento cliente con **React Router** (*Nota 4.5*), control estricto de **Rutas Restringidas** con pantalla de acceso denegado y privacidad de amistades (*Nota 5.0*).
 
 ---
 
@@ -10,21 +10,24 @@
 | :--- | :--- | :--- |
 | **3.5** | **Conceptos de Hooks y Vídeos** | • Uso de `useState` para publicaciones, sesión, modales y formularios.<br>• Uso de `useEffect` para persistencia en `localStorage`, limpieza de timers y listener de teclado.<br>• Uso de `useContext` (`SocialContext`) para estado global sin prop-drilling.<br>• Soporte nativo para publicaciones con vídeo HTML5 (`<video controls>`). |
 | **4.0** | **Diseño Idéntico a un Post de Facebook** | • Cabecera con avatar circular (44px), autor en negrita, icono de globo terráqueo (🌐) y menú de 3 puntos.<br>• Barra de reacciones oficial de Facebook con iconos superpuestos (👍 Me gusta azul, ❤️ Me encanta rojo, 😆 Me divierte amarillo).<br>• Botones de acción "Me gusta", "Comentar" y "Compartir" con estilos e iluminación azul Facebook.<br>• Sección de comentarios con burbujas redondeadas gris claro (`#f0f2f5`). |
-| **4.5** | **Corrección del Error de ID del Post del Vídeo** | • Explicación y resolución del error clásico de tutoriales donde se usaba `posts.length + 1` o índices de array.<br>• Creación de `src/utils/idGenerator.js` con `crypto.randomUUID()` inmutable.<br>• Identificadores 100% únicos y estables que eliminan el warning de consola `Encountered two children with the same key`. |
-| **5.0** | **Responder Comentarios, Likes y Compartir** | • **Responder**: Enlace interactivo en cada comentario con respuestas anidadas e indentadas.<br>• **Likes**: Likes independientes con contador en posts, comentarios (insignia flotante 👍) y respuestas.<br>• **Compartir**: Clona el post en el muro del usuario mostrando el marco del autor original y suma el contador de compartidos. |
+| **4.5** | **Agregar Rutas a las Páginas de la RedSocial** | • Integración completa de las páginas de `Paginas RedSocial_app`: **Inicio / Feed** (`/`), **Perfil** (`/perfil`), **Mensajes / Chat** (`/mensajes`), **Grupos** (`/grupos`), **Configuración** (`/configuracion`), **Login** (`/login`) y **Registro** (`/registro`).<br>• Enrutamiento declarativo SPA con `react-router-dom` (`BrowserRouter`, `Routes`, `Route`, `NavLink`, `Link`).<br>• Navegación fluida e instantánea en Navbar superior y menú móvil sin recarga de navegador. |
+| **5.0** | **Crear Rutas Restringidas (Protegidas) y Privacidad de Amigos** | • Guardián `<ProtectedRoute>` que intercepta accesos no autenticados a `/`, `/perfil`, `/mensajes`, `/grupos` y `/configuracion`.<br>• Pantalla de **"Acceso Incorrecto: no puedes ver esta página"** (`AccessDeniedPage`) con botón directo para **Iniciar Sesión** (`/login`).<br>• Guardián `<PublicOnlyRoute>` que redirige a `/` si un usuario autenticado intenta acceder a `/login` o `/registro`.<br>• **Privacidad estricta de amigos**: Los usuarios que no sean amigos confirmados (como Juana de Arco mientras esté en solicitud pendiente) no pueden publicar ni comentar en el feed del usuario, ni el usuario ve sus posts o comentarios hasta aceptar su solicitud.<br>• Responder comentarios anidados, likes independientes en posts/comentarios y compartir publicaciones. |
 
 ---
 
-## 🌟 Funcionalidades Avanzadas Implementadas
+## 🌟 Páginas y Funcionalidades Implementadas
 
-- ✏️ **Edición de Perfil y Cambio de Foto**: Botón en la tarjeta de perfil para cambiar foto (desde tu PC, cámara o galería) y actualizar nombre, rol, ubicación y fecha de nacimiento con persistencia.
-- 🔐 **Simulación de Login / Logout**: Pantalla de bienvenida estilo Facebook para iniciar sesión en 1 clic con cuentas de prueba (*Juan Pérez, Juana de Arco, Angie López, Carlos Mendoza*) o con nombre propio, y botón "Cerrar sesión" en el Navbar.
-- 🔎 **Buscador de Usuarios en Tiempo Real**: Barra de búsqueda en la cabecera para filtrar personas en vivo y conocer su estado de amistad.
-- 🤝 **Enviar y Gestionar Solicitudes de Amistad**: Botón para agregar amigos desde la búsqueda y tarjeta en la columna derecha para Aceptar o Rechazar solicitudes recibidas.
-- 🗑️ **Eliminar Publicaciones**: Menú desplegable en los 3 puntos (`...`) de cada post para eliminar publicaciones con confirmación.
-- 🔍 **Visor de Fotos en Pantalla Completa (Lightbox)**: Al hacer clic en cualquier imagen publicada o en la galería del perfil, se abre un visor modal en alta definición con fondo oscuro y soporte para tecla `Escape`.
-- 📁 **Subida de Archivos desde tu PC**: Creador de posts con soporte para adjuntar imágenes y vídeos locales (convertidos a Base64 con `FileReader` para persistir entre recargas) o seleccionar muestras de la galería.
-- 🌿 **Diseño Espacioso con CSS Grid**: Separación limpia de 28px entre columnas y 24px entre publicaciones en el feed, eliminando el aspecto apretado.
+- 🏠 **Feed Principal (`/`)**: Muro de publicaciones estilo Facebook con creación de posts multimedia, likes, comentarios, respuestas y eliminación. Margen superior calibrado para evitar recortes con la barra fija.
+- 👤 **Página de Perfil (`/perfil`)**: Portada personalizable (subir desde PC o muestras), biografía, detalles personales, fotos ampliables y pestañas siempre visibles (*Publicaciones, Información, Amigos, Fotos*).
+- 💬 **Mensajes y Chat Bidireccional (`/mensajes`)**: Alertas en la campana de notificaciones e insignia animada en el icono de mensajes al recibir chats nuevos, selector de réplica para simular respuestas de amigos y auto-scroll.
+- 👥 **Directorio de Grupos (`/grupos`)**: Diseño espacioso y moderno con separación visual clara, buscador en vivo, lista de comunidades y creación rápida de nuevos grupos.
+- ⚙️ **Configuración de Cuenta (`/configuracion`)**: Actualización de información, notificaciones y cambio seguro de contraseña (con confirmación privada sin exponer la clave).
+- 🔐 **Iniciar Sesión con Verificación Estricta (`/login`)**: Validación de credenciales contra `localStorage`, rechazo de contraseñas incorrectas y banner de seguridad limpio sin exponer contraseñas.
+- 📝 **Crear Cuenta (`/registro`)**: Registro completo con foto de perfil desde el PC o avatares oficiales (`logo1.png`), fecha de nacimiento y contraseña cifrada/almacenada.
+- 🚫 **Pantalla de Acceso Incorrecto (`AccessDeniedPage`)**: Interfaz visual amigable y clara cuando un usuario no autenticado intenta acceder a una ruta privada, con botón directo de redirección al login.
+- 🛡️ **Privacidad de Amigos Reactiva**: Juana de Arco está inicialmente en estado de solicitud pendiente. Sus publicaciones y comentarios no aparecen en el Feed ni en el Chat hasta que el usuario presione "Aceptar" en la tarjeta de solicitudes.
+- 🔔 **Notificaciones de Alto Contraste**: Desplegable de notificaciones con texto permanente en color negro `#050505` y fondo legible que nunca hace desaparecer las letras.
+- 🔍 **Visor de Fotos en Pantalla Completa (Lightbox)**: Al hacer clic en cualquier imagen publicada o de perfil, se abre en alta definición con tecla `Escape`.
 
 ---
 
@@ -40,21 +43,33 @@ RedSocialReact/
 ├── WALKTHROUGH.html               # Versión web imprimible en PDF
 ├── src/
 │   ├── main.jsx                   # Punto de entrada de ReactDOM
-│   ├── App.jsx                    # Componente raíz con layout y control de autenticación
-│   ├── App.css                    # Estilos del layout espacioso (Grid / Flexbox)
+│   ├── App.jsx                    # Componente raíz con rutas declarativas y toast
+│   ├── App.css                    # Estilos del layout espacioso (Grid / Flexbox / Selecciones)
 │   ├── context/
 │   │   └── SocialContext.jsx      # Contexto Global (Auth, Posts, Amigos, Lightbox)
 │   ├── utils/
 │   │   └── idGenerator.js         # Generador de UUIDs inmutables
 │   ├── data/
 │   │   └── initialData.js         # Datos iniciales (usuarios, posts con vídeo, fotos)
+│   ├── pages/                     # Páginas de la RedSocial (Rutas Nota 4.5)
+│   │   ├── FeedPage.jsx           # Ruta / (Inicio y Feed)
+│   │   ├── ProfilePage.jsx        # Ruta /perfil (Perfil del usuario)
+│   │   ├── ChatPage.jsx           # Ruta /mensajes (Chat interactivo)
+│   │   ├── GroupsPage.jsx         # Ruta /grupos (Grupos y comunidades)
+│   │   ├── SettingsPage.jsx       # Ruta /configuracion (Ajustes de cuenta)
+│   │   ├── LoginPage.jsx          # Ruta /login (Iniciar sesión)
+│   │   ├── RegisterPage.jsx       # Ruta /registro (Crear cuenta)
+│   │   ├── AccessDeniedPage.jsx   # Pantalla de acceso incorrecto / ruta restringida
+│   │   └── NotFoundPage.jsx       # Ruta * (404 no encontrada)
 │   └── components/
 │       ├── Auth/
-│       │   └── LoginScreen.jsx    # Pantalla de inicio de sesión con cuentas de prueba
+│       │   ├── ProtectedRoute.jsx # Guardián de Rutas Restringidas (Nota 5.0)
+│       │   ├── PublicOnlyRoute.jsx # Guardián de Rutas Públicas
+│       │   └── LoginScreen.jsx    # Componente modal de acceso rápido
 │       ├── Feed/
-│       │   ├── Feed.jsx           # Columna central del feed
+│       │   ├── Feed.jsx           # Columna central del feed con filtrado por amistad
 │       │   ├── CreatePost.jsx     # Creador de posts interactivo (local/muestras)
-│       │   ├── PostCard.jsx       # Tarjeta estilo Facebook con comentarios y respuestas
+│       │   ├── PostCard.jsx       # Tarjeta estilo Facebook con comentarios y respuestas filtradas
 │       │   ├── ImageLightboxModal.jsx # Visor de fotos a pantalla completa
 │       │   └── FacebookPost.css   # Estilos CSS de alta fidelidad estilo Facebook
 │       ├── LeftSidebar/
@@ -68,8 +83,9 @@ RedSocialReact/
 │       │   ├── RightSidebar.jsx   # Columna derecha
 │       │   ├── UpcomingEvents.jsx # Próximos eventos
 │       │   ├── FriendRequest.jsx  # Solicitud de amistad dinámica (Aceptar/Rechazar)
-│       │   └── AdsCard.jsx        # Widgets adicionales
-│       ├── Navbar.jsx             # Barra superior con buscador en vivo y menú de cuenta
+│       │   ├── SearchFriendsCard.jsx # Buscador de personas y estado de solicitudes
+│       │   └── AdsCard.jsx        # Widgets adicionales / Comunidad
+│       ├── Navbar.jsx             # Barra superior con NavLink, Perfil fijo en blanco y buscador
 │       └── Footer.jsx             # Pie de página temático
 ```
 
@@ -78,6 +94,7 @@ RedSocialReact/
 ## 🛠️ Tecnologías Utilizadas
 
 - **React 18** (`useState`, `useEffect`, `useContext`, `createContext`, `useRef`)
+- **React Router 6** (`BrowserRouter`, `Routes`, `Route`, `NavLink`, `Link`, `useNavigate`, `useLocation`)
 - **Vite 5** (Entorno de desarrollo y compilador ultra rápido)
 - **JavaScript Moderno (ES6+)**
 - **CSS3 / CSS Grid / Flexbox**
@@ -101,10 +118,20 @@ npm run build
 
 ---
 
+## 👥 Diseñado por (Autores del Proyecto)
+
+- **Bryan Rafael Mendoza**
+- **Sebastián Gonzales**
+- **Mariana Rico**
+- **Yadir Morales**
+
+---
+
 ## 📤 Comandos para Subir a Git (GitHub)
 
 ```bash
 git add .
-git commit -m "Entrega completa PochecheBook: Hooks, estilo Facebook, identidad de marca, edición de perfil, login, buscador y solicitudes"
+git commit -m "PochecheBook: Portada ampliable, logo a inicio, borrar notificaciones y creditos de autores"
 git push origin main
 ```
+

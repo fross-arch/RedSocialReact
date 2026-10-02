@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSocial } from '../context/SocialContext';
 import { notificationsList } from '../data/initialData';
 
@@ -7,8 +8,14 @@ export default function Navbar() {
     currentUser,
     usersList,
     logout,
-    sendFriendRequest
+    sendFriendRequest,
+    unreadMessagesCount,
+    unreadMessagesList,
+    notifications,
+    clearNotifications
   } = useSocial();
+
+  const navigate = useNavigate();
 
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,7 +58,15 @@ export default function Navbar() {
     : [];
 
   const requestsReceivedCount = currentUser.requestsReceived ? currentUser.requestsReceived.length : 0;
-  const totalNotifs = notificationsList.length + requestsReceivedCount;
+  const isJuanaFriend = (currentUser.friends || []).includes('user-3');
+  // Si Juana de Arco no es amiga aceptada, se excluyen notificaciones de interacción de ella
+  const filteredNotifs = (notifications || []).filter(notif => {
+    if (notif.includes('Juana') && !isJuanaFriend) {
+      return false;
+    }
+    return true;
+  });
+  const totalNotifs = filteredNotifs.length + requestsReceivedCount + (unreadMessagesCount || 0);
 
   return (
     <>
@@ -76,12 +91,16 @@ export default function Navbar() {
             <i className="fa fa-bars"></i>
           </button>
 
-          {/* Logo / Inicio */}
-          <a
-            href="#"
-            className="w3-bar-item w3-button w3-padding-large w3-theme-d4"
-            style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}
-            title="PochecheBook - Inicio"
+          {/* Logo / Inicio interactivo en icono y texto */}
+          <Link
+            to="/"
+            onClick={() => {
+              navigate('/');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="w3-bar-item w3-button w3-padding-large w3-hover-white"
+            style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', cursor: 'pointer' }}
+            title="PochecheBook - Ir al Inicio"
           >
             <img
               src="/logo1.png"
@@ -93,11 +112,12 @@ export default function Navbar() {
                 objectFit: 'contain',
                 backgroundColor: '#ffffff',
                 border: '1.5px solid rgba(255,255,255,0.85)',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                cursor: 'pointer'
               }}
             />
-            <span style={{ fontSize: '1.15rem', letterSpacing: '0.4px', fontWeight: 700 }}>PochecheBook</span>
-          </a>
+            <span style={{ fontSize: '1.15rem', letterSpacing: '0.4px', fontWeight: 700, cursor: 'pointer' }}>PochecheBook</span>
+          </Link>
 
           {/* Buscador de personas en tiempo real (Con overflow visible garantizado) */}
           <div
@@ -188,6 +208,7 @@ export default function Navbar() {
                     const isCurrent = user.id === currentUser.id;
                     const isFriend = (currentUser.friends || []).includes(user.id);
                     const isRequestSent = (currentUser.requestsSent || []).includes(user.id);
+                    const isRequestReceived = (currentUser.requestsReceived || []).includes(user.id);
 
                     return (
                       <div
@@ -245,6 +266,10 @@ export default function Navbar() {
                             <span className="w3-tag w3-green w3-round w3-small" style={{ fontWeight: 600 }}>
                               ✓ Amigos
                             </span>
+                          ) : isRequestReceived ? (
+                            <span className="w3-tag w3-amber w3-round w3-small" style={{ fontWeight: 600, color: '#000' }}>
+                              Solicitud recibida
+                            </span>
                           ) : isRequestSent ? (
                             <span className="w3-tag w3-light-grey w3-round w3-small" style={{ color: '#65676b' }}>
                               Enviada
@@ -270,20 +295,91 @@ export default function Navbar() {
 
           <div style={{ flex: 1 }}></div>
 
-          {/* Iconos de Navegación */}
-          <a href="#" className="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Noticias">
-            <i className="fa fa-globe"></i>
-          </a>
+          {/* Iconos de Navegación de Páginas con NavLink (Nota 4.5) */}
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `w3-bar-item w3-button w3-hide-small w3-padding-large ${isActive ? 'w3-theme-d4' : 'w3-hover-white'}`
+            }
+            style={{ textDecoration: 'none' }}
+            title="Inicio / Feed"
+          >
+            <i className="fa fa-home"></i>
+          </NavLink>
+
+          <NavLink
+            to="/perfil"
+            className={({ isActive }) =>
+              `w3-bar-item w3-button w3-hide-small w3-padding-large ${isActive ? 'w3-theme-d4' : 'w3-hover-white'}`
+            }
+            style={{ textDecoration: 'none' }}
+            title="Mi Perfil"
+          >
+            <i className="fa fa-user"></i>
+          </NavLink>
+
+          <NavLink
+            to="/mensajes"
+            className={({ isActive }) =>
+              `w3-bar-item w3-button w3-hide-small w3-padding-large ${isActive ? 'w3-theme-d4' : 'w3-hover-white'}`
+            }
+            style={{ textDecoration: 'none', position: 'relative' }}
+            title="Mensajes y Chat"
+          >
+            <i className="fa fa-envelope"></i>
+            {unreadMessagesCount > 0 && (
+              <span
+                className="w3-badge w3-small w3-red"
+                style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '6px',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  animation: 'pulse 1.5s infinite'
+                }}
+              >
+                {unreadMessagesCount}
+              </span>
+            )}
+          </NavLink>
+
+          <NavLink
+            to="/grupos"
+            className={({ isActive }) =>
+              `w3-bar-item w3-button w3-hide-small w3-padding-large ${isActive ? 'w3-theme-d4' : 'w3-hover-white'}`
+            }
+            style={{ textDecoration: 'none' }}
+            title="Grupos"
+          >
+            <i className="fa fa-users"></i>
+          </NavLink>
+
+          <NavLink
+            to="/configuracion"
+            className={({ isActive }) =>
+              `w3-bar-item w3-button w3-hide-small w3-padding-large ${isActive ? 'w3-theme-d4' : 'w3-hover-white'}`
+            }
+            style={{ textDecoration: 'none' }}
+            title="Configuración de la cuenta"
+          >
+            <i className="fa fa-cog"></i>
+          </NavLink>
 
           {/* Menú de Notificaciones */}
           <div ref={notifRef} style={{ position: 'relative' }}>
             <button
               onClick={() => setShowNotifDropdown(prev => !prev)}
               className="w3-button w3-padding-large w3-hover-white"
-              title="Notificaciones"
-              style={{ position: 'relative' }}
+              title="Notificaciones y mensajes"
+              style={{
+                position: 'relative',
+                color: '#ffffff',
+                backgroundColor: showNotifDropdown ? 'rgba(255,255,255,0.2)' : 'transparent'
+              }}
             >
-              <i className="fa fa-bell"></i>
+              <i className="fa fa-bell" style={{ color: '#ffffff' }}></i>
               {totalNotifs > 0 && (
                 <span
                   className="w3-badge w3-small w3-green"
@@ -312,50 +408,138 @@ export default function Navbar() {
                   borderRadius: '10px',
                   zIndex: 99999,
                   border: '1px solid #e4e6eb',
-                  overflow: 'hidden'
+                  overflow: 'hidden',
+                  color: '#050505'
                 }}
               >
-                <div style={{ padding: '12px 16px', fontWeight: 'bold', borderBottom: '1px solid #eee', fontSize: '15px', color: '#050505' }}>
-                  Notificaciones
+                <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee', backgroundColor: '#ffffff' }}>
+                  <span style={{ fontWeight: 'bold', fontSize: '15px', color: '#050505' }}>Notificaciones y Avisos</span>
+                  {(filteredNotifs.length > 0 || unreadMessagesCount > 0) && (
+                    <button
+                      type="button"
+                      onClick={clearNotifications}
+                      className="w3-button w3-small w3-round w3-light-grey"
+                      style={{ fontSize: '11px', padding: '4px 8px', color: '#65676b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}
+                      title="Borrar todas las notificaciones"
+                    >
+                      <i className="fa fa-trash"></i> Borrar notificaciones
+                    </button>
+                  )}
                 </div>
-                {requestsReceivedCount > 0 && (
-                  <a
-                    href="#solicitudes"
-                    onClick={() => setShowNotifDropdown(false)}
-                    className="w3-bar-item w3-button w3-pale-yellow"
-                    style={{ fontSize: '13px', padding: '12px 16px', display: 'block', textDecoration: 'none' }}
+
+                {/* Alerta de mensajes nuevos sin leer */}
+                {unreadMessagesCount > 0 && (
+                  <div
+                    onClick={() => {
+                      setShowNotifDropdown(false);
+                      navigate('/mensajes');
+                    }}
+                    style={{
+                      fontSize: '13px',
+                      padding: '12px 16px',
+                      backgroundColor: '#e7f3ff',
+                      color: '#050505',
+                      borderBottom: '1px solid #d0e4ff',
+                      lineHeight: '1.4',
+                      cursor: 'pointer'
+                    }}
                   >
-                    <i className="fa fa-user-plus w3-text-blue"></i> Tienes <strong>{requestsReceivedCount}</strong> solicitud(es) de amistad pendiente(s).
-                  </a>
-                )}
-                {notificationsList.map((notif, index) => (
-                  <div key={index} style={{ padding: '12px 16px', borderBottom: '1px solid #f0f2f5', fontSize: '13px', color: '#050505' }}>
-                    <i className="fa fa-circle w3-text-blue" style={{ fontSize: '8px', marginRight: '8px' }}></i>
-                    {notif}
+                    <i className="fa fa-envelope" style={{ color: '#1877f2', marginRight: '6px' }}></i>
+                    <span style={{ color: '#050505' }}>
+                      Tienes <strong>{unreadMessagesCount}</strong> mensaje(s) nuevo(s) sin leer. <span className="w3-text-blue" style={{ fontWeight: 600 }}>Ver chat →</span>
+                    </span>
                   </div>
-                ))}
+                )}
+
+                {requestsReceivedCount > 0 && (
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      padding: '12px 16px',
+                      backgroundColor: '#fef7e6',
+                      color: '#050505',
+                      borderBottom: '1px solid #f9e2ae',
+                      lineHeight: '1.4'
+                    }}
+                  >
+                    <i className="fa fa-user-plus" style={{ color: '#f59e0b', marginRight: '6px' }}></i>
+                    <span style={{ color: '#050505' }}>
+                      Tienes <strong>{requestsReceivedCount}</strong> solicitud(es) de amistad pendiente(s).
+                    </span>
+                  </div>
+                )}
+
+                {filteredNotifs.length === 0 && requestsReceivedCount === 0 && unreadMessagesCount === 0 ? (
+                  <div style={{ padding: '16px', textAlign: 'center', color: '#65676b', fontSize: '13px' }}>
+                    No tienes notificaciones nuevas.
+                  </div>
+                ) : (
+                  filteredNotifs.map((notif, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        padding: '12px 16px',
+                        borderBottom: '1px solid #f0f2f5',
+                        fontSize: '13px',
+                        color: '#050505',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f0f2f5';
+                        e.currentTarget.style.color = '#050505';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                        e.currentTarget.style.color = '#050505';
+                      }}
+                    >
+                      <i className="fa fa-circle" style={{ fontSize: '8px', marginRight: '8px', color: '#1877f2' }}></i>
+                      <span style={{ color: '#050505' }}>{notif}</span>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>
 
-          {/* Menú de Mi Cuenta y Cerrar Sesión */}
+          {/* Menú de Mi Perfil y Cerrar Sesión */}
           <div ref={accountRef} style={{ position: 'relative' }}>
             <button
               onClick={() => setShowAccountDropdown(prev => !prev)}
               className="w3-button w3-padding-large w3-hover-white"
-              title="Mi Cuenta"
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              title="Perfil"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: '#ffffff',
+                backgroundColor: showAccountDropdown ? 'rgba(255,255,255,0.2)' : 'transparent'
+              }}
             >
               <img
                 src={currentUser.avatar}
                 className="w3-circle"
-                style={{ height: '28px', width: '28px', objectFit: 'cover' }}
+                style={{
+                  height: '28px',
+                  width: '28px',
+                  objectFit: 'cover',
+                  border: '1.5px solid rgba(255,255,255,0.85)'
+                }}
                 alt="Avatar"
               />
-              <span className="w3-hide-small" style={{ fontSize: '14px', fontWeight: 600 }}>
-                {currentUser.name.split(' ')[0]}
+              <span
+                className="w3-hide-small"
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#ffffff'
+                }}
+              >
+                Perfil
               </span>
-              <i className="fa fa-caret-down" style={{ fontSize: '12px' }}></i>
+              <i className="fa fa-caret-down" style={{ fontSize: '12px', color: '#ffffff' }}></i>
             </button>
 
             {showAccountDropdown && (
@@ -385,13 +569,56 @@ export default function Navbar() {
                   </div>
                 </div>
 
+                <Link
+                  to="/perfil"
+                  onClick={() => setShowAccountDropdown(false)}
+                  className="w3-button w3-hover-light-grey"
+                  style={{
+                    textAlign: 'left',
+                    width: '100%',
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    color: '#050505',
+                    backgroundColor: '#ffffff'
+                  }}
+                >
+                  <i className="fa fa-user" style={{ color: '#1877f2', fontSize: '16px' }}></i>
+                  <span style={{ color: '#050505', fontWeight: 600 }}>Ver mi perfil</span>
+                </Link>
+
+                <Link
+                  to="/configuracion"
+                  onClick={() => setShowAccountDropdown(false)}
+                  className="w3-button w3-hover-light-grey"
+                  style={{
+                    textAlign: 'left',
+                    width: '100%',
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    color: '#050505',
+                    backgroundColor: '#ffffff'
+                  }}
+                >
+                  <i className="fa fa-cog" style={{ color: '#1877f2', fontSize: '16px' }}></i>
+                  <span style={{ color: '#050505', fontWeight: 600 }}>Configuración</span>
+                </Link>
+
                 <button
                   type="button"
                   onClick={() => {
                     setShowAccountDropdown(false);
                     logout();
+                    navigate('/login');
                   }}
-                  className="w3-bar-item w3-button w3-hover-pale-red"
+                  className="w3-button w3-hover-pale-red"
                   style={{
                     color: '#e41e3f',
                     fontWeight: 600,
@@ -401,11 +628,13 @@ export default function Navbar() {
                     padding: '12px 16px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px'
+                    gap: '12px',
+                    backgroundColor: '#ffffff',
+                    borderTop: '1px solid #f0f2f5'
                   }}
                 >
-                  <i className="fa fa-sign-out"></i>
-                  <span>Cerrar sesión</span>
+                  <i className="fa fa-sign-out" style={{ color: '#e41e3f', fontSize: '16px' }}></i>
+                  <span style={{ color: '#e41e3f' }}>Cerrar sesión</span>
                 </button>
               </div>
             )}
@@ -413,7 +642,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Menú de navegación en pantallas pequeñas */}
+      {/* Menú de navegación en pantallas pequeñas con Link */}
       <div
         id="navDemo"
         className={`w3-bar-block w3-theme-d2 w3-hide w3-hide-large w3-hide-medium w3-large ${
@@ -421,15 +650,32 @@ export default function Navbar() {
         }`}
         style={{ marginTop: '51px' }}
       >
-        <a href="#" className="w3-bar-item w3-button w3-padding-large">Inicio</a>
-        <a href="#" className="w3-bar-item w3-button w3-padding-large">Mi Perfil ({currentUser.name})</a>
+        <Link to="/" onClick={() => setIsNavOpen(false)} className="w3-bar-item w3-button w3-padding-large">
+          <i className="fa fa-home w3-margin-right"></i>Inicio
+        </Link>
+        <Link to="/perfil" onClick={() => setIsNavOpen(false)} className="w3-bar-item w3-button w3-padding-large">
+          <i className="fa fa-user w3-margin-right"></i>Mi Perfil ({currentUser.name})
+        </Link>
+        <Link to="/mensajes" onClick={() => setIsNavOpen(false)} className="w3-bar-item w3-button w3-padding-large">
+          <i className="fa fa-envelope w3-margin-right"></i>Mensajes {unreadMessagesCount > 0 && <span className="w3-badge w3-red w3-small" style={{ marginLeft: '8px' }}>{unreadMessagesCount}</span>}
+        </Link>
+        <Link to="/grupos" onClick={() => setIsNavOpen(false)} className="w3-bar-item w3-button w3-padding-large">
+          <i className="fa fa-users w3-margin-right"></i>Grupos
+        </Link>
+        <Link to="/configuracion" onClick={() => setIsNavOpen(false)} className="w3-bar-item w3-button w3-padding-large">
+          <i className="fa fa-cog w3-margin-right"></i>Configuración
+        </Link>
         <button
           type="button"
-          onClick={logout}
+          onClick={() => {
+            setIsNavOpen(false);
+            logout();
+            navigate('/login');
+          }}
           className="w3-bar-item w3-button w3-padding-large"
-          style={{ color: '#ffb3b3', textAlign: 'left', width: '100%' }}
+          style={{ color: '#ffb3b3', textAlign: 'left', width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)' }}
         >
-          <i className="fa fa-sign-out"></i> Cerrar sesión
+          <i className="fa fa-sign-out w3-margin-right"></i>Cerrar sesión
         </button>
       </div>
     </>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSocial } from '../../context/SocialContext';
 import EditProfileModal from './EditProfileModal';
 
@@ -40,6 +41,14 @@ export default function ProfileCard() {
             <i className="fa fa-birthday-cake fa-fw w3-margin-right w3-text-theme"></i>
             {currentUser.birthDate}
           </p>
+
+          <Link
+            to="/perfil"
+            className="w3-button w3-block w3-theme-l4 w3-round w3-margin-top"
+            style={{ fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
+          >
+            <i className="fa fa-user"></i> Ver perfil completo
+          </Link>
 
           <button
             type="button"

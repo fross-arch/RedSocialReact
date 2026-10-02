@@ -5,7 +5,7 @@
 /* Contenedor principal con Grid espacioso (elimina la apariencia unida/apretada) */
 .main-layout-container {
   max-width: 1320px;
-  margin: 75px auto 40px auto;
+  margin: 20px auto 40px auto;
   padding: 0 24px;
   display: grid;
   grid-template-columns: 290px minmax(0, 1fr) 280px;
@@ -74,3 +74,32 @@
     display: none;
   }
 }
+
+/* Selección de texto con contraste garantizado en toda la aplicación */
+::selection {
+  background-color: #1877f2;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: #1877f2;
+  color: #ffffff;
+}
+
+/* Visibilidad permanente para opciones, enlaces y menús */
+.w3-white a,
+.w3-white button:not(.w3-theme-d2):not(.w3-theme-d1):not(.w3-theme-d4):not(.w3-blue):not(.w3-green):not(.w3-red),
+.w3-white p,
+.w3-white span:not(.w3-tag):not(.w3-badge) {
+  color: #050505;
+}
+
+/* Enlaces y botones temáticos con texto blanco explícito */
+.w3-button.w3-theme-d2,
+.w3-button.w3-theme-d1,
+.w3-button.w3-theme-d4,
+.w3-button.w3-blue {
+  color: #ffffff !important;
+}
+
+

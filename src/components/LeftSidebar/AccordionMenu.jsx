@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { photoGallery } from '../../data/initialData';
 import { useSocial } from '../../context/SocialContext';
 
 export default function AccordionMenu() {
   const { openLightbox } = useSocial();
   const [openSections, setOpenSections] = useState({
-    groups: false,
-    events: false,
-    photos: false
+    groups: true,
+    events: true,
+    photos: true
   });
 
   const toggleSection = (section) => {
@@ -34,7 +35,10 @@ export default function AccordionMenu() {
             openSections.groups ? 'w3-show' : 'w3-hide'
           }`}
         >
-          <p>Desarrollo Web, React y Diseño UI/UX...</p>
+          <p style={{ margin: '8px 0 4px 0' }}>Desarrollo Web, React y Diseño UI/UX...</p>
+          <Link to="/grupos" className="w3-text-theme w3-small" style={{ fontWeight: 600, display: 'inline-block', marginBottom: '8px' }}>
+            Explorar todos los grupos →
+          </Link>
         </div>
 
         {/* Mis Eventos */}

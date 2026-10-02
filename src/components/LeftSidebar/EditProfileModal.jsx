@@ -10,9 +10,12 @@ export default function EditProfileModal({ isOpen, onClose }) {
   const [location, setLocation] = useState(currentUser.location || '');
   const [birthDate, setBirthDate] = useState(currentUser.birthDate || '');
   const [avatar, setAvatar] = useState(currentUser.avatar || '');
+  const [coverPhoto, setCoverPhoto] = useState(currentUser.coverPhoto || '/pochechebook.jpg');
   const [showGallery, setShowGallery] = useState(false);
+  const [showCoverGallery, setShowCoverGallery] = useState(false);
 
   const fileInputRef = useRef(null);
+  const coverFileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
@@ -28,6 +31,18 @@ export default function EditProfileModal({ isOpen, onClose }) {
     reader.readAsDataURL(file);
   };
 
+  const handleCoverFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setCoverPhoto(event.target.result);
+      setShowCoverGallery(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -38,7 +53,8 @@ export default function EditProfileModal({ isOpen, onClose }) {
       location: location.trim() || 'No especificada',
       birthDate: birthDate.trim() || 'No especificada',
       avatar: avatar || currentUser.avatar,
-      currentUserAvatar: avatar || currentUser.avatar
+      currentUserAvatar: avatar || currentUser.avatar,
+      coverPhoto: coverPhoto || currentUser.coverPhoto || '/pochechebook.jpg'
     });
 
     onClose();
@@ -106,8 +122,108 @@ export default function EditProfileModal({ isOpen, onClose }) {
 
         {/* Formulario */}
         <form onSubmit={handleSave} style={{ padding: '20px', maxHeight: '75vh', overflowY: 'auto' }}>
+          {/* Foto de portada */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#65676b', marginBottom: '6px' }}>
+              🖼️ Foto de Portada:
+            </label>
+            <div style={{ position: 'relative', width: '100%', height: '120px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#e4e6eb', border: '1px solid #ddd' }}>
+              <img
+                src={coverPhoto}
+                alt="Vista previa de portada"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <button
+                type="button"
+                onClick={() => coverFileInputRef.current && coverFileInputRef.current.click()}
+                style={{
+                  position: 'absolute',
+                  bottom: '8px',
+                  right: '8px',
+                  background: 'rgba(0,0,0,0.7)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <i className="fa fa-camera"></i> Cambiar portada
+              </button>
+            </div>
+
+            <input
+              type="file"
+              ref={coverFileInputRef}
+              onChange={handleCoverFile}
+              accept="image/*"
+              style={{ display: 'none' }}
+            />
+
+            <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                className="w3-button w3-small w3-light-grey w3-round"
+                onClick={() => coverFileInputRef.current && coverFileInputRef.current.click()}
+                style={{ fontSize: '12px' }}
+              >
+                <i className="fa fa-upload"></i> Subir portada de mi PC
+              </button>
+              <button
+                type="button"
+                className="w3-button w3-small w3-light-grey w3-round"
+                onClick={() => setShowCoverGallery(prev => !prev)}
+                style={{ fontSize: '12px' }}
+              >
+                <i className="fa fa-image"></i> Elegir de galería
+              </button>
+            </div>
+
+            {showCoverGallery && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+                gap: '8px',
+                background: '#f0f2f5',
+                padding: '10px',
+                borderRadius: '8px',
+                marginTop: '8px'
+              }}>
+                {[
+                  "/pochechebook.jpg",
+                  "https://www.w3schools.com/w3images/nature.jpg",
+                  "https://www.w3schools.com/w3images/lights.jpg",
+                  "https://www.w3schools.com/w3images/mountains.jpg",
+                  "https://www.w3schools.com/w3images/forest.jpg"
+                ].map((cov, idx) => (
+                  <img
+                    key={idx}
+                    src={cov}
+                    alt={`Portada ${idx + 1}`}
+                    onClick={() => { setCoverPhoto(cov); setShowCoverGallery(false); }}
+                    style={{
+                      width: '100%',
+                      height: '52px',
+                      borderRadius: '6px',
+                      objectFit: 'cover',
+                      cursor: 'pointer',
+                      border: coverPhoto === cov ? '2px solid #1877f2' : '1px solid #ccc'
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Foto de perfil */}
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#65676b', marginBottom: '6px' }}>
+              👤 Foto de Perfil:
+            </label>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <img
                 src={avatar}

@@ -4,6 +4,7 @@ import { useSocial } from '../../context/SocialContext';
 export default function PostCard({ post }) {
   const {
     currentUser,
+    usersList,
     toggleLikePost,
     addComment,
     toggleLikeComment,
@@ -52,7 +53,30 @@ export default function PostCard({ post }) {
     sharePost(post.id);
   };
 
-  const commentsList = post.comments || [];
+  // Validación de amistad para comentarios:
+  // Si Juana de Arco no es amiga aceptada, ni ella puede comentar ni el usuario ve comentarios de ella
+  const isFriendOrSelf = (authorName) => {
+    if (!authorName) return false;
+    if (authorName === currentUser.name || authorName === 'Mi Perfil' || authorName === 'PochecheBook Oficial') {
+      return true;
+    }
+    const authorUser = (usersList || []).find(
+      u => u.name.toLowerCase() === authorName.toLowerCase()
+    );
+    if (authorUser) {
+      return (currentUser.friends || []).includes(authorUser.id) || authorUser.id === currentUser.id;
+    }
+    return true;
+  };
+
+  const rawComments = post.comments || [];
+  const commentsList = rawComments
+    .filter(comment => isFriendOrSelf(comment.author))
+    .map(comment => ({
+      ...comment,
+      replies: (comment.replies || []).filter(reply => isFriendOrSelf(reply.author))
+    }));
+
   const totalCommentsCount = commentsList.reduce(
     (acc, curr) => acc + 1 + (curr.replies ? curr.replies.length : 0),
     0

@@ -5,7 +5,30 @@ import { useSocial } from '../../context/SocialContext';
 import './FacebookPost.css';
 
 export default function Feed() {
-  const { posts, toastMessage, resetPostsToDefault } = useSocial();
+  const { posts, currentUser, usersList, toastMessage, resetPostsToDefault } = useSocial();
+
+  // Filtrado de privacidad: Solo mostrar publicaciones propias, oficiales o de amigos confirmados.
+  // Usuarios no agregados (como Juana de Arco previo a aceptar su solicitud) quedan excluidos.
+  const visiblePosts = (posts || []).filter(post => {
+    if (
+      post.author === currentUser.name ||
+      post.author === 'Mi Perfil' ||
+      post.author === 'PochecheBook Oficial' ||
+      post.isShared
+    ) {
+      return true;
+    }
+
+    const authorUser = (usersList || []).find(
+      u => u.name.toLowerCase() === post.author.toLowerCase()
+    );
+
+    if (authorUser) {
+      return (currentUser.friends || []).includes(authorUser.id);
+    }
+
+    return true;
+  });
 
   return (
     <section className="feed-col">
@@ -21,8 +44,8 @@ export default function Feed() {
       <CreatePost />
 
       {/* Lista de Publicaciones con keys únicas inmutables */}
-      {posts && posts.length > 0 ? (
-        posts.map(post => (
+      {visiblePosts && visiblePosts.length > 0 ? (
+        visiblePosts.map(post => (
           <PostCard key={post.id} post={post} />
         ))
       ) : (

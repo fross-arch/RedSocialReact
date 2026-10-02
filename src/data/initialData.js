@@ -3,8 +3,11 @@ export const defaultUsers = [
     id: "user-1",
     name: "Mi Perfil",
     username: "miperfil",
+    email: "miperfil@pochechebook.com",
+    password: "123456",
     avatar: "https://www.w3schools.com/w3images/avatar3.png",
     currentUserAvatar: "https://www.w3schools.com/w3images/avatar3.png",
+    coverPhoto: "/pochechebook.jpg",
     role: "Diseñador, UI",
     location: "Londres, Reino Unido",
     birthDate: "1 de abril de 1988",
@@ -16,6 +19,8 @@ export const defaultUsers = [
     id: "user-2",
     name: "Juan Pérez",
     username: "juanperez",
+    email: "juanperez@pochechebook.com",
+    password: "123456",
     avatar: "https://www.w3schools.com/w3images/avatar2.png",
     currentUserAvatar: "https://www.w3schools.com/w3images/avatar2.png",
     role: "Fotógrafo & Viajero",
@@ -29,6 +34,8 @@ export const defaultUsers = [
     id: "user-3",
     name: "Juana de Arco",
     username: "juanadearco",
+    email: "juanadearco@pochechebook.com",
+    password: "123456",
     avatar: "https://www.w3schools.com/w3images/avatar5.png",
     currentUserAvatar: "https://www.w3schools.com/w3images/avatar5.png",
     role: "Ingeniera de Software",
@@ -42,6 +49,8 @@ export const defaultUsers = [
     id: "user-4",
     name: "Angie López",
     username: "angielopez",
+    email: "angielopez@pochechebook.com",
+    password: "123456",
     avatar: "https://www.w3schools.com/w3images/avatar6.png",
     currentUserAvatar: "https://www.w3schools.com/w3images/avatar6.png",
     role: "Diseñadora Gráfica",
@@ -55,6 +64,8 @@ export const defaultUsers = [
     id: "user-5",
     name: "Carlos Mendoza",
     username: "carlosm",
+    email: "carlosm@pochechebook.com",
+    password: "123456",
     avatar: "https://www.w3schools.com/w3images/avatar4.png",
     currentUserAvatar: "https://www.w3schools.com/w3images/avatar4.png",
     role: "Desarrollador Full Stack",
@@ -68,6 +79,8 @@ export const defaultUsers = [
     id: "user-6",
     name: "Sofía Gómez",
     username: "sofiag",
+    email: "sofiag@pochechebook.com",
+    password: "123456",
     avatar: "https://www.w3schools.com/w3images/avatar5.png",
     currentUserAvatar: "https://www.w3schools.com/w3images/avatar5.png",
     role: "Especialista en Marketing Digital",
@@ -81,6 +94,8 @@ export const defaultUsers = [
     id: "user-7",
     name: "Mateo Rodríguez",
     username: "mateor",
+    email: "mateor@pochechebook.com",
+    password: "123456",
     avatar: "https://www.w3schools.com/w3images/avatar1.png",
     currentUserAvatar: "https://www.w3schools.com/w3images/avatar1.png",
     role: "Diseñador UX/UI",
@@ -94,6 +109,8 @@ export const defaultUsers = [
     id: "user-8",
     name: "Valentina Morales",
     username: "valentinam",
+    email: "valentinam@pochechebook.com",
+    password: "123456",
     avatar: "https://www.w3schools.com/w3images/avatar6.png",
     currentUserAvatar: "https://www.w3schools.com/w3images/avatar6.png",
     role: "Community Manager & Redes",
@@ -102,6 +119,42 @@ export const defaultUsers = [
     friends: [],
     requestsSent: [],
     requestsReceived: []
+  }
+];
+
+export const initialChatMessages = [
+  {
+    id: "msg-1",
+    senderId: "user-2",
+    senderName: "Juan Pérez",
+    senderAvatar: "https://www.w3schools.com/w3images/avatar2.png",
+    receiverId: "user-1",
+    text: "¡Hola! ¿Cómo va el diseño de PochecheBook?",
+    time: "10:28",
+    timestamp: Date.now() - 3600000,
+    isRead: true
+  },
+  {
+    id: "msg-2",
+    senderId: "user-1",
+    senderName: "Mi Perfil",
+    senderAvatar: "https://www.w3schools.com/w3images/avatar3.png",
+    receiverId: "user-2",
+    text: "Muy bien, casi terminado. ¿Te gustó la última versión?",
+    time: "10:30",
+    timestamp: Date.now() - 3500000,
+    isRead: true
+  },
+  {
+    id: "msg-3",
+    senderId: "user-2",
+    senderName: "Juan Pérez",
+    senderAvatar: "https://www.w3schools.com/w3images/avatar2.png",
+    receiverId: "user-1",
+    text: "Sí, está genial. Quedó súper fluido el feed y el visor de fotos.",
+    time: "10:32",
+    timestamp: Date.now() - 3400000,
+    isRead: true
   }
 ];
 

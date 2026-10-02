@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initialPosts, defaultUsers } from '../data/initialData';
+import { initialPosts, defaultUsers, initialChatMessages, notificationsList } from '../data/initialData';
 import { generateId } from '../utils/idGenerator';
 
 // Creación del Contexto Global con createContext
@@ -9,10 +9,16 @@ export const SocialProvider = ({ children }) => {
   // Hook useState: Lista de usuarios registrados en el sistema
   const [usersList, setUsersList] = useState(() => {
     try {
-      const saved = localStorage.getItem('pochechebook_users_v1') || localStorage.getItem('red_social_users_v2');
+      const saved = localStorage.getItem('pochechebook_users_v2') || localStorage.getItem('pochechebook_users_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(u => ({
+            ...u,
+            email: u.email || `${u.username || 'usuario'}@pochechebook.com`,
+            password: u.password || '123456'
+          }));
+        }
       }
     } catch (e) {
       console.warn('Error al cargar usuarios de localStorage:', e);
@@ -23,14 +29,33 @@ export const SocialProvider = ({ children }) => {
   // Hook useState: Usuario autenticado actual
   const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const saved = localStorage.getItem('pochechebook_current_user_v1') || localStorage.getItem('red_social_current_user_v2');
+      const saved = localStorage.getItem('pochechebook_current_user_v2') || localStorage.getItem('pochechebook_current_user_v1');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return {
+          ...parsed,
+          email: parsed.email || `${parsed.username || 'usuario'}@pochechebook.com`,
+          password: parsed.password || '123456'
+        };
       }
     } catch (e) {
       console.warn('Error al cargar usuario actual:', e);
     }
     return defaultUsers[0];
+  });
+
+  // Hook useState: Historial global persistente de mensajes de chat
+  const [chatMessages, setChatMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pochechebook_chat_messages_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Error al cargar mensajes de chat:', e);
+    }
+    return initialChatMessages;
   });
 
   // Hook useState: Estado de autenticación
@@ -59,6 +84,33 @@ export const SocialProvider = ({ children }) => {
   // Hook useState: Estado del visor de imagen en pantalla completa (Lightbox)
   const [lightboxImage, setLightboxImage] = useState(null);
 
+  // Hook useState: Notificaciones
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pochechebook_notifications_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Error al cargar notificaciones:', e);
+    }
+    return notificationsList;
+  });
+
+  // Hook useEffect: Persistencia automática de notificaciones
+  useEffect(() => {
+    try {
+      localStorage.setItem('pochechebook_notifications_v1', JSON.stringify(notifications));
+    } catch (err) {
+      console.error('Error al persistir notificaciones:', err);
+    }
+  }, [notifications]);
+
+  // Borrar todas las notificaciones y marcar mensajes como leídos
+  const clearNotifications = () => {
+    setNotifications([]);
+    setChatMessages(prev => prev.map(m => ({ ...m, isRead: true })));
+    setToastMessage('🗑️ Notificaciones eliminadas.');
+  };
+
   // Hook useEffect: Persistencia automática de posts
   useEffect(() => {
     try {
@@ -68,11 +120,20 @@ export const SocialProvider = ({ children }) => {
     }
   }, [posts]);
 
+  // Hook useEffect: Persistencia automática de mensajes de chat
+  useEffect(() => {
+    try {
+      localStorage.setItem('pochechebook_chat_messages_v2', JSON.stringify(chatMessages));
+    } catch (err) {
+      console.error('Error al persistir mensajes de chat:', err);
+    }
+  }, [chatMessages]);
+
   // Hook useEffect: Persistencia de usuarios y sesión
   useEffect(() => {
     try {
-      localStorage.setItem('pochechebook_users_v1', JSON.stringify(usersList));
-      localStorage.setItem('pochechebook_current_user_v1', JSON.stringify(currentUser));
+      localStorage.setItem('pochechebook_users_v2', JSON.stringify(usersList));
+      localStorage.setItem('pochechebook_current_user_v2', JSON.stringify(currentUser));
       localStorage.setItem('pochechebook_auth_v1', JSON.stringify(isAuthenticated));
     } catch (err) {
       console.error('Error al persistir sesión:', err);
@@ -118,10 +179,16 @@ export const SocialProvider = ({ children }) => {
 
   // Registrar un nuevo usuario de forma permanente
   const registerUser = (userData) => {
+    const username = userData.username
+      ? userData.username.trim()
+      : userData.name.trim().toLowerCase().replace(/\s+/g, '');
+
     const newUser = {
       id: generateId('user'),
       name: userData.name.trim(),
-      username: userData.username ? userData.username.trim() : userData.name.trim().toLowerCase().replace(/\s+/g, ''),
+      username: username,
+      email: userData.email ? userData.email.trim() : `${username}@pochechebook.com`,
+      password: userData.password ? userData.password.trim() : '123456',
       avatar: userData.avatar || "https://www.w3schools.com/w3images/avatar2.png",
       currentUserAvatar: userData.avatar || "https://www.w3schools.com/w3images/avatar2.png",
       role: userData.role ? userData.role.trim() : 'Usuario de PochecheBook',
@@ -145,7 +212,7 @@ export const SocialProvider = ({ children }) => {
     setToastMessage('Sesión cerrada correctamente.');
   };
 
-  // Actualizar datos del perfil y foto
+  // Actualizar datos del perfil, contraseña y foto
   const updateProfile = (updatedFields) => {
     const updatedUser = { ...currentUser, ...updatedFields };
     setCurrentUser(updatedUser);
@@ -153,20 +220,95 @@ export const SocialProvider = ({ children }) => {
     // Actualizar también en la lista general de usuarios
     setUsersList(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
 
-    // Actualizar nombre y avatar en los posts creados por este usuario
-    setPosts(prev => prev.map(p => {
-      if (p.author === currentUser.name || p.author === updatedUser.name) {
-        return {
-          ...p,
-          author: updatedUser.name,
-          avatar: updatedUser.avatar
-        };
-      }
-      return p;
-    }));
+    // Actualizar nombre y avatar en los posts creados por este usuario si cambiaron
+    if (updatedFields.name || updatedFields.avatar) {
+      setPosts(prev => prev.map(p => {
+        if (p.author === currentUser.name || p.author === updatedUser.name) {
+          return {
+            ...p,
+            author: updatedUser.name,
+            avatar: updatedUser.avatar
+          };
+        }
+        return p;
+      }));
+    }
 
-    setToastMessage('¡Perfil actualizado con éxito!');
+    setToastMessage('¡Perfil y datos actualizados con éxito!');
   };
+
+  /* ========================================================
+     ACCIONES DE MENSAJERÍA Y CHAT
+     ======================================================== */
+
+  // Enviar mensaje en el chat
+  const sendMessage = (receiverId, text) => {
+    if (!text || !text.trim()) return;
+    const receiver = usersList.find(u => u.id === receiverId);
+    const newMsg = {
+      id: generateId('msg'),
+      senderId: currentUser.id,
+      senderName: currentUser.name,
+      senderAvatar: currentUser.avatar,
+      receiverId: receiverId,
+      receiverName: receiver ? receiver.name : 'Usuario',
+      text: text.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: Date.now(),
+      isRead: true
+    };
+    setChatMessages(prev => [...prev, newMsg]);
+    return newMsg;
+  };
+
+  // Responder mensaje como otro usuario (para interactuar y simular respuestas)
+  const sendReplyAsUser = (senderUserId, receiverUserId, text) => {
+    if (!text || !text.trim()) return;
+    const sender = usersList.find(u => u.id === senderUserId);
+    if (!sender) return;
+    const isToCurrent = receiverUserId === currentUser.id;
+    const newMsg = {
+      id: generateId('msg'),
+      senderId: sender.id,
+      senderName: sender.name,
+      senderAvatar: sender.avatar,
+      receiverId: receiverUserId,
+      text: text.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: Date.now(),
+      isRead: !isToCurrent // Si va dirigido al usuario activo, se marca como no leído para generar alerta
+    };
+    setChatMessages(prev => [...prev, newMsg]);
+
+    // Alerta visual Toast en la campana / interfaz
+    if (isToCurrent) {
+      const snippet = text.trim().length > 30 ? text.trim().slice(0, 30) + '...' : text.trim();
+      setToastMessage(`🔔 Nuevo mensaje de ${sender.name}: "${snippet}"`);
+    }
+
+    return newMsg;
+  };
+
+  // Marcar mensajes como leídos al abrir conversación con un contacto
+  const markMessagesAsRead = (contactId) => {
+    setChatMessages(prev =>
+      prev.map(m => {
+        if (m.receiverId === currentUser.id && m.senderId === contactId && !m.isRead) {
+          return { ...m, isRead: true };
+        }
+        return m;
+      })
+    );
+  };
+
+  // Cálculo reactivo de mensajes sin leer dirigidos al usuario actual
+  const unreadMessagesCount = chatMessages.filter(
+    m => m.receiverId === currentUser.id && !m.isRead
+  ).length;
+
+  const unreadMessagesList = chatMessages.filter(
+    m => m.receiverId === currentUser.id && !m.isRead
+  );
 
   /* ========================================================
      ACCIONES DE AMIGOS Y SOLICITUDES
@@ -469,6 +611,14 @@ export const SocialProvider = ({ children }) => {
         registerUser,
         logout,
         updateProfile,
+        chatMessages,
+        sendMessage,
+        sendReplyAsUser,
+        markMessagesAsRead,
+        unreadMessagesCount,
+        unreadMessagesList,
+        notifications,
+        clearNotifications,
         sendFriendRequest,
         acceptFriendRequest,
         declineFriendRequest,
